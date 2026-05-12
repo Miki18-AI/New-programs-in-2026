@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOVE WAVE (2D, Readable)</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            /* Убрана perspective, так как 3D больше нет */
+        }
+
+        .container {
+            position: relative;
+            /* Убраны transform-style и animation rotar */
+        }
+
+        .cl_love_word {
+            position: absolute;
+            color: #ff69b4;
+            font-family: Arial, sans-serif;
+            font-size: 16px; /* Чуть увеличим шрифт для читаемости */
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff69b4;
+            white-space: nowrap;
+            opacity: 0;
+            /* Оставляем только анимацию пульсации/появления */
+            animation: aparicion 4s infinite linear;
+            will-change: opacity;
+            /* CSS-трансформ используется ТОЛЬКО для центрирования самого слова */
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes aparicion {
+            0% { opacity: 0; }
+            50% { opacity: 1; text-shadow: 0 0 15px #ff69b4; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="heart-container"></div>
+
+    <script>
+        const container = document.getElementById('heart-container');
+        
+        // Значительно уменьшаем количество слов для читаемости (60 штук)
+        const totalWords = 60; 
+
+        for (let i = 0; i < totalWords; i = i + 1) {
+            const word = document.createElement('div');
+            word.className = 'cl_love_word';
+            word.innerText = 'I love you';
+
+            // t варьируется от 0 до 2π
+            const t = (i / totalWords) * Math.PI * 2;
+
+            // Классическая формула формы сердца (без Math.pow)
+            const sinT = Math.sin(t);
+            const x = 16 * sinT * sinT * sinT;
+            const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+            // Масштаб для 2D-сердца
+            const scale = 16; 
+            
+            // Рассчитываем 2D-координаты. JS задает их один раз при создании.
+            const finalX = (x * scale);
+            const finalY = (y * scale);
+
+            // Позиционируем каждое слово через calc(50% + X), чтобы сердце было по центру
+            word.style.left = 'calc(50% + ' + finalX + 'px)';
+            word.style.top = 'calc(50% + ' + finalY + 'px)';
+
+            // МАТЕМАТИКА ДВУХ ПЛАВНЫХ ВОЛН (прежняя логика):
+            // Отрицательная задержка распределяется от 0 до -8 секунд (4s длительность * 2 волны).
+            const delay = -(t / Math.PI) * 4; 
+            word.style.animationDelay = delay + 's';
+
+            container.appendChild(word);
+        }
+    </script>
+</body>
+</html>
