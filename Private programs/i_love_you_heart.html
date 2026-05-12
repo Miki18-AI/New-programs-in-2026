@@ -1,0 +1,90 @@
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; }
+  #canvas-wrap {
+    background: #000;
+    width: 100%;
+    min-height: 500px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+  canvas { display: block; width: 100%; }
+</style>
+<div id="canvas-wrap">
+  <canvas id="c"></canvas>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 680, H = 500;
+canvas.width = W;
+canvas.height = H;
+
+function heartPoint(t) {
+  const x = 16 * Math.pow(Math.sin(t), 3);
+  const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+  return [x, y];
+}
+
+const particles = [];
+const COUNT = 140;
+
+for (let i = 0; i < COUNT; i++) {
+  const t = Math.random() * Math.PI * 2;
+  const [hx, hy] = heartPoint(t);
+  const scale = 13;
+  const cx = W/2 + hx * scale;
+  const cy = H/2 + hy * scale - 20;
+
+  particles.push({
+    x: cx,
+    y: cy,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.4 + Math.random() * 0.8,
+    size: 9 + Math.random() * 6,
+    drift: (Math.random() - 0.5) * 0.3,
+    opacity: 0.4 + Math.random() * 0.6,
+    text: 'I love you'
+  });
+}
+
+let frame = 0;
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+
+  frame++;
+
+  for (const p of particles) {
+    const pulse = 0.5 + 0.5 * Math.sin(frame * 0.02 * p.speed + p.phase);
+    const alpha = (0.2 + pulse * 0.8) * p.opacity;
+    
+    const r = Math.floor(200 + pulse * 55);
+    const g = Math.floor(20 + pulse * 30);
+    const b = Math.floor(60 + pulse * 40);
+    
+    ctx.font = `${p.size}px Georgia, serif`;
+    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const wobble = Math.sin(frame * 0.015 * p.speed + p.phase) * 1.5;
+    ctx.fillText(p.text, p.x + wobble, p.y + Math.sin(frame * 0.01 * p.speed + p.phase) * 2);
+  }
+
+  const glow = ctx.createRadialGradient(W/2, H/2 - 20, 0, W/2, H/2 - 20, 230);
+  const gAlpha = 0.04 + 0.03 * Math.sin(frame * 0.03);
+  glow.addColorStop(0, `rgba(220,30,80,${gAlpha})`);
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  requestAnimationFrame(draw);
+}
+
+draw();
+</script>

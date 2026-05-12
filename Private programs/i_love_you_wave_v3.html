@@ -1,0 +1,69 @@
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+#wrap { background:#000; width:100%; border-radius:12px; overflow:hidden; position:relative; height:520px; }
+</style>
+<div id="wrap"></div>
+<script>
+const wrap = document.getElementById('wrap');
+const W = wrap.offsetWidth || 680;
+const H = 520;
+const TOTAL = 90;
+const DURATION = 5000;
+
+const words = [];
+
+for (let i = 0; i < TOTAL; i++) {
+  const t = (i / TOTAL) * Math.PI * 2;
+  const sinT = Math.sin(t);
+  const x = 16 * sinT * sinT * sinT;
+  const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+  const scale = 14;
+
+  const el = document.createElement('div');
+  el.innerText = 'I love you';
+  el.style.cssText = `
+    position:absolute;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+    font-weight:bold;
+    color:#ff69b4;
+    white-space:nowrap;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+    will-change:opacity,text-shadow;
+    left:${W/2 + x*scale}px;
+    top:${H/2 + y*scale - 10}px;
+    opacity:1;
+  `;
+  wrap.appendChild(el);
+
+  // delay based on angle t: wave travels around heart 0→2π
+  const delay = -(t / (Math.PI * 2)) * DURATION;
+
+  words.push({ el, delay });
+}
+
+function tick(now) {
+  for (const w of words) {
+    // phase 0..1 cycling
+    const phase = ((now + w.delay) % DURATION + DURATION) % DURATION / DURATION;
+
+    // opacity curve: mostly visible, dips to 0 around phase=0.5
+    // smooth sine dip: 1 → 0 → 1
+    const opacity = 0.5 - 0.5 * Math.cos(phase * Math.PI * 2);
+    // invert so wave = disappear: 1 when fully visible, 0 at peak of wave
+    const alpha = 1 - opacity * 0.97;
+
+    w.el.style.opacity = alpha;
+    if (alpha > 0.7) {
+      w.el.style.textShadow = `0 0 8px rgba(255,105,180,${alpha})`;
+    } else {
+      w.el.style.textShadow = 'none';
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+</script>
